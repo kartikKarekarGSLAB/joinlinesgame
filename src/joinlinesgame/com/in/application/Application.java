@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
 
@@ -40,7 +41,7 @@ public class Application {
 			System.out.println("Please enter number of points column ::");
 			Integer columns = Integer.parseInt(br.readLine());
 			
-			dataset = new LinkedHashMap<>();
+			dataset = new ConcurrentHashMap<>();
 			long cellNumber = 1;
 			
 			for(int i=0; i<rows-1; i++) {
@@ -52,7 +53,7 @@ public class Application {
 						   side4 = (X+1) + "" + Y + (X+1) + "" + (Y +1);
 					List<String> sides = new LinkedList<>();
 					sides.add(side1);sides.add(side2);sides.add(side3);sides.add(side4);					
-					dataset.put(cellNumber+"", sides);					
+					dataset.put(String.valueOf(cellNumber), sides);					
 					cellNumber++;
 				}
 			}
@@ -80,12 +81,11 @@ public class Application {
 
 				for(Entry<String, List<String>> value :  dataset.entrySet()) {
 					List<String> currentEdges = value.getValue();
-					if(currentEdges.size() == 0) cellcounter++;
 					if(currentEdges.contains(edge) || currentEdges.contains(reverse) ) {
-						currentEdges.remove(edge);
-						currentEdges.remove(reverse);
+						currentEdges.remove(edge);currentEdges.remove(reverse);
 						if(currentEdges.size() == 0) {
 							// win condition for player continue with that player.
+							dataset.remove(value.getKey());
 							oneMoreChance = true;
 							if(player.equalsIgnoreCase("A")) {
 								aCells++;
@@ -100,21 +100,24 @@ public class Application {
 				for(Entry<String, List<String>> value :  dataset.entrySet()) {
 					System.out.println("Key["+value.getKey() + "]="+value.getValue());
 				}
-				if(dataset.size() == cellcounter) {
+				if(dataset.size() == 0) {
 					break;
-				} else {
-					if(!oneMoreChance && player.equalsIgnoreCase("A")) {
+				}
+				
+				if(!oneMoreChance) {
+					if(player.equalsIgnoreCase("A")) {
 						player = "B";						
-					} else if (!oneMoreChance && player.equalsIgnoreCase("B")) {
+					} else if(player.equalsIgnoreCase("B")) {
 						player = "A";
 					}
-				}
+				} 
+				
 				
 				oneMoreChance= false;
 				cellcounter=0;				
 			}
-			
-			System.out.println("A ="+aCells + ", B="+bCells);
+			System.out.println("A=,"+aCells+" B="+bCells);
+			System.out.println("A ="+(aCells > bCells ? "Winner" : "Better Luck Nexttime") + ", B="+(bCells > aCells ? "Winner" : "Better Luck Nexttime"));
 			
 		} catch (Exception e) {
 			e.printStackTrace();
