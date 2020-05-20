@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,24 +13,11 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
-
-	public static void printGrid(final Integer rows, final Integer columns, final String edge) {
-		long cellNumber = 1;
-		for(int i=0; i<rows; i++) {
-			int barIndex = 0;
-			for(int j=0; j<columns; j++) {
-				System.out.print("---");
-				System.out.print(cellNumber++);
-				System.out.print("---");
-				System.out.print("|");				
-			}
-			System.out.println("");
-		}
-	}
 	
 	public static void main(String[] args) {
 		
 		Map<String, List<String>> dataset;
+		Map<Integer, Map<String, String>> captureMatix;
 		try {
 			
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -42,6 +30,8 @@ public class Application {
 			Integer columns = Integer.parseInt(br.readLine());
 			
 			dataset = new ConcurrentHashMap<>();
+			captureMatix = new LinkedHashMap<>();
+			
 			long cellNumber = 1;
 			
 			for(int i=0; i<rows-1; i++) {
@@ -52,8 +42,11 @@ public class Application {
 						   side3 = X + "" + (Y+1) + (X+1) + "" + (Y +1),
 						   side4 = (X+1) + "" + Y + (X+1) + "" + (Y +1);
 					List<String> sides = new LinkedList<>();
-					sides.add(side1);sides.add(side2);sides.add(side3);sides.add(side4);					
-					dataset.put(String.valueOf(cellNumber), sides);					
+					sides.add(side1);sides.add(side2);sides.add(side3);sides.add(side4);
+					dataset.put(String.valueOf(cellNumber), sides);
+					Map<String, String> cellEntry = new HashMap<>();
+					cellEntry.put(String.valueOf(cellNumber), "A");
+					captureMatix.put(i, cellEntry);
 					cellNumber++;
 				}
 			}
@@ -61,8 +54,6 @@ public class Application {
 			for(Entry<String, List<String>> value :  dataset.entrySet()) {
 				System.out.println("Key["+value.getKey() + "]="+value.getValue());
 			}
-			
-			printGrid(rows,columns,"");
 			
 			String player = "A";
 			int aCells =0, bCells =0, cellcounter =0;
@@ -85,13 +76,14 @@ public class Application {
 						currentEdges.remove(edge);currentEdges.remove(reverse);
 						if(currentEdges.size() == 0) {
 							// win condition for player continue with that player.
-							dataset.remove(value.getKey());
-							oneMoreChance = true;
 							if(player.equalsIgnoreCase("A")) {
 								aCells++;
 							} else {
+//								updateCaptureMatrix(captureMatix, value.getKey(), "B");
 								bCells++;
 							}
+							oneMoreChance = true;
+							dataset.remove(value.getKey());
 							
 						}						
 					}
@@ -100,6 +92,10 @@ public class Application {
 				for(Entry<String, List<String>> value :  dataset.entrySet()) {
 					System.out.println("Key["+value.getKey() + "]="+value.getValue());
 				}
+				
+//				for(Entry<String, String> value :  captureMatix.entrySet()) {
+//					System.out.println("Cell["+value.getKey() + "]="+value.getValue());
+//				}
 				if(dataset.size() == 0) {
 					break;
 				}
