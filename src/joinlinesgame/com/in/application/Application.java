@@ -2,8 +2,6 @@ package joinlinesgame.com.in.application;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -14,7 +12,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
 	
+	public static void printGrid(char [][] captureMatrix) {
+		System.out.println(".--");
+		// System.out.println(capture);
+	}
+		
 	public static void main(String[] args) {
+		
+		char[][] captureMatrix = {{'A','B','B'},
+								  {'A','B','B'},
+								  {'A','B','B'}};
+		printGrid(captureMatrix);
+		
 		
 		Map<String, List<String>> dataset;
 		Map<Integer, Map<String, String>> captureMatix;
@@ -22,18 +31,17 @@ public class Application {
 			
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			
-			System.out.println("Enter Dimentions ::");
-			System.out.println("Please enter number of points in row ::");			
+			System.out.println("Enter dimentions of the grid.");
+			System.out.println("Please enter number of points in a row:");			
 			Integer rows = Integer.parseInt(br.readLine());
 			
-			System.out.println("Please enter number of points column ::");
+			System.out.println("Please enter number of points in a column:");
 			Integer columns = Integer.parseInt(br.readLine());
 			
 			dataset = new ConcurrentHashMap<>();
 			captureMatix = new LinkedHashMap<>();
-			
 			long cellNumber = 1;
-			
+			// Populating the LinkedHashMap with the edges. The key is the cell number
 			for(int i=0; i<rows-1; i++) {
 				for(int j=0; j<columns-1; j++) {					
 					int X = i, Y = j;					
@@ -58,24 +66,27 @@ public class Application {
 			String player = "A";
 			int aCells =0, bCells =0, cellcounter =0;
 			boolean oneMoreChance = false;
-			
+			// Main game loop
 			while(true) {
 						
-				System.out.println("\n\nIt's palyer "+ player +"'s Turn:");
-				System.out.println("Please enter start of point of edge:");			
+				System.out.println("\n\nPlayer "+ player +"'s turn:");
+				System.out.println("Please enter starting co-coordinates of the edge:");			
 				String start = br.readLine();
-				System.out.println("Please enter start of point of edge:");			
+				System.out.println("Please enter ending co-coordinates of edge:");			
 				String end = br.readLine();
 				
 				String edge = start + end;
-				String reverse = end + start; // In any user specify the side in other order.
+				String reverse = end + start; // The user can specify the edge in opposite order
 
 				for(Entry<String, List<String>> value :  dataset.entrySet()) {
 					List<String> currentEdges = value.getValue();
+					if(currentEdges.size() == 0) cellcounter++;
 					if(currentEdges.contains(edge) || currentEdges.contains(reverse) ) {
-						currentEdges.remove(edge);currentEdges.remove(reverse);
+						currentEdges.remove(edge);
+						currentEdges.remove(reverse);
 						if(currentEdges.size() == 0) {
-							// win condition for player continue with that player.
+							// If user captures a cell, repeat his turn
+							oneMoreChance = true;
 							if(player.equalsIgnoreCase("A")) {
 								aCells++;
 							} else {
@@ -92,28 +103,21 @@ public class Application {
 				for(Entry<String, List<String>> value :  dataset.entrySet()) {
 					System.out.println("Key["+value.getKey() + "]="+value.getValue());
 				}
-				
-//				for(Entry<String, String> value :  captureMatix.entrySet()) {
-//					System.out.println("Cell["+value.getKey() + "]="+value.getValue());
-//				}
 				if(dataset.size() == 0) {
 					break;
-				}
-				
-				if(!oneMoreChance) {
-					if(player.equalsIgnoreCase("A")) {
+				} else {
+					if(!oneMoreChance && player.equalsIgnoreCase("A")) {
 						player = "B";						
-					} else if(player.equalsIgnoreCase("B")) {
+					} else if (!oneMoreChance && player.equalsIgnoreCase("B")) {
 						player = "A";
 					}
-				} 
-				
+				}
 				
 				oneMoreChance= false;
 				cellcounter=0;				
 			}
-			System.out.println("A=,"+aCells+" B="+bCells);
-			System.out.println("A ="+(aCells > bCells ? "Winner" : "Better Luck Nexttime") + ", B="+(bCells > aCells ? "Winner" : "Better Luck Nexttime"));
+			
+			System.out.println("A ="+aCells + ", B="+bCells);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
